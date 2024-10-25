@@ -1,37 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../security/AccessControl.sol";
 import "../interfaces/IAdmin.sol";
+import "../security/AccessControl.sol";
 
 contract Admin is IAdmin, AccessControl {
-    event AdminAdded(address indexed newAdmin);
-    event FarmerAdded(address indexed newFarmer);
-    event CustomerAdded(address indexed newCustomer);
+    string[] public categories;
+    mapping(string => bool) public categoryExists;
 
-    // Fungsi untuk menambahkan admin baru
-    function addAdmin(address _admin) public onlyAdmin {
-        require(_admin != address(0), "Invalid address");
-        admins[_admin] = true;
-        users[_admin].isAdmin = true;
+    event CategoryAdded(string category);
 
-        emit AdminAdded(_admin);
+    modifier onlyNewCategory(string memory _category) {
+        require(!categoryExists[_category], "Category already exists");
+        _;
     }
 
-    // Fungsi untuk mendaftarkan petani baru
-    function addFarmer(address _farmer) public onlyAdmin {
-        require(_farmer != address(0), "Invalid address");
-        farmers[_farmer] = true;
-        users[_farmer].isFarmer = true;
-
-        emit FarmerAdded(_farmer);
+    function addCategory(string memory _category) external onlyAdmin onlyNewCategory(_category) {
+        categories.push(_category);
+        categoryExists[_category] = true;
+        emit CategoryAdded(_category);
     }
 
-    // Fungsi untuk mendaftarkan pelanggan baru
-    function addCustomer(address _customer) public onlyAdmin {
-        require(_customer != address(0), "Invalid address");
-        users[_customer].isCustomer = true;
-
-        emit CustomerAdded(_customer);
+    function getCategories() external view returns (string[] memory) {
+        return categories;
     }
 }

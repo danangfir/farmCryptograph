@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 interface IAdmin {
-    // Fungsi untuk menambahkan admin baru
-    function addAdmin(address _admin) external;
+    // Event untuk kategori baru yang ditambahkan
+    event CategoryAdded(string category);
 
-    // Fungsi untuk mendaftarkan petani baru
-    function addFarmer(address _farmer) external;
+    // Fungsi untuk menambah kategori baru
+    function addCategory(string memory _category) external;
 
-    // Fungsi untuk mendaftarkan pelanggan baru
-    function addCustomer(address _customer) external;
+    // Fungsi untuk mendapatkan daftar kategori yang tersedia
+    function getCategories() external view returns (string[] memory);
 }

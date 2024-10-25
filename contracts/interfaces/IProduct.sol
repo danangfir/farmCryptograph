@@ -1,18 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/ProductLib.sol";
-
 interface IProduct {
-    // Fungsi untuk menambahkan produk baru
-    function addProduct(string memory _name, string memory _ipfsHash) external;
+    // Struktur data untuk produk
+    struct ProductInfo {
+        uint256 id;
+        string name;
+        string category;
+        string origin;
+        string ipfsHash;
+        address owner;
+        bool verified;
+    }
 
-    // Fungsi untuk mensahkan (sertifikasi) produk
-    function certifyProduct(uint256 _productId, string memory _ipfsHash) external;
+    // Event untuk produk yang baru ditambahkan
+    event ProductAdded(uint256 indexed id, string name, string category, string origin, string ipfsHash, address indexed owner);
 
-    // Fungsi untuk mentransfer kepemilikan produk
-    function transferProduct(uint256 _productId, address _newOwner) external;
+    // Event untuk produk yang diverifikasi
+    event ProductVerified(uint256 indexed id, address verifiedBy);
+
+    // Fungsi untuk menambah produk baru
+    function addProduct(string memory _name, string memory _category, string memory _origin, string memory _ipfsHash) external;
+
+    // Fungsi untuk verifikasi produk
+    function verifyProduct(uint256 _id) external;
 
     // Fungsi untuk mendapatkan informasi produk
-    function getProduct(uint256 _productId) external view returns (ProductLib.ProductData memory);
+    function getProduct(uint256 _id) external view returns (ProductInfo memory);
 }

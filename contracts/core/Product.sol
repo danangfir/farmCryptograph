@@ -1,57 +1,45 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../security/AccessControl.sol";
-import "../libraries/ProductLib.sol";
 import "../interfaces/IProduct.sol";
+import "../security/AccessControl.sol";
 
 contract Product is IProduct, AccessControl {
-    using ProductLib for ProductLib.ProductData;
-
-    // Mapping untuk menyimpan produk
-    mapping(uint256 => ProductLib.ProductData) public products;
-    uint256 public productCounter;
-
-    event ProductAdded(uint256 indexed productId, string name, address indexed farmer);
-    event ProductCertified(uint256 indexed productId, string ipfsHash);
-    event ProductTransferred(uint256 indexed productId, address indexed from, address indexed to);
-
-    // Fungsi untuk menambahkan produk baru
-    function addProduct(string memory _name, string memory _ipfsHash) public onlyFarmer {
-        productCounter++;
-        products[productCounter] = ProductLib.ProductData(
-            productCounter,
-            _name,
-            msg.sender,
-            _ipfsHash,
-            false,
-            msg.sender
-        );
-        emit ProductAdded(productCounter, _name, msg.sender);
+    struct ProductInfo {
+        uint256 id;
+        string name;
+        string category;
+        string origin;
+        string ipfsHash; // IPFS hash untuk metadata produk
+        address owner;
+        bool verified;
     }
 
-    // Fungsi untuk mensahkan (sertifikasi) produk
-    function certifyProduct(uint256 _productId, string memory _ipfsHash) public onlyAdmin {
-        require(products[_productId].id != 0, "Product does not exist");
-        products[_productId].certified = true;
-        products[_productId].ipfsHash = _ipfsHash;
+    mapping(uint256 => ProductInfo) private products;
+    uint256 public productCount;
 
-        emit ProductCertified(_productId, _ipfsHash);
+    event ProductAdded(uint256 indexed id, string name, string category, string origin, string ipfsHash, address indexed owner);
+    event ProductVerified(uint256 indexed id, address verifiedBy);
+
+    modifier onlyExistingProduct(uint256 _id) {
+        require(_id > 0 && _id <= productCount, "Product does not exist");
+        _;
     }
 
-    // Fungsi untuk mentransfer produk ke pemilik baru
-    function transferProduct(uint256 _productId, address _newOwner) public {
-        require(products[_productId].currentOwner == msg.sender, "Not the owner");
-        require(users[_newOwner].isCustomer || users[_newOwner].isFarmer, "Invalid new owner");
+    function addProduct(string memory _name, string memory _category, string memory _origin, string memory _ipfsHash) 
+        external onlyAdmin {
+        productCount++;
+        products[productCount] = ProductInfo(productCount, _name, _category, _origin, _ipfsHash, msg.sender, false);
 
-        products[_productId].currentOwner = _newOwner;
-
-        emit ProductTransferred(_productId, msg.sender, _newOwner);
+        emit ProductAdded(productCount, _name, _category, _origin, _ipfsHash, msg.sender);
     }
 
-    // Fungsi untuk mendapatkan informasi produk
-    function getProduct(uint256 _productId) public view returns (ProductLib.ProductData memory) {
-        require(products[_productId].id != 0, "Product does not exist");
-        return products[_productId];
+    function verifyProduct(uint256 _id) external onlyAdmin onlyExistingProduct(_id) {
+        products[_id].verified = true;
+        emit ProductVerified(_id, msg.sender);
+    }
+
+    function getProduct(uint256 _id) external view onlyExistingProduct(_id) returns (ProductInfo memory) {
+        return products[_id];
     }
 }
