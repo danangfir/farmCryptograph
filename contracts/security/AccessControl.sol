@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Impor pustaka Utils
+import "../libraries/Utils.sol";
+
 contract AccessControl {
+    using Utils for *; // Menghubungkan pustaka Utils
+
     // Mapping untuk admin, petani, dan pelanggan
     mapping(address => bool) public admins;
     mapping(address => bool) public farmers;

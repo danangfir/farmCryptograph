@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract ERC721ProductNFT is ERC721URIStorage, Ownable {
     uint256 public tokenIdCounter;
 
-    constructor() ERC721("ProductNFT", "PNFT") {
+    constructor() ERC721("ProductNFT", "PNFT") Ownable() {
         tokenIdCounter = 1; // Mulai dari 1 untuk NFT ID
     }
 
@@ -24,7 +24,7 @@ contract ERC721ProductNFT is ERC721URIStorage, Ownable {
 
     // Fungsi untuk mengupdate metadata URI
     function updateTokenURI(uint256 tokenId, string memory tokenURI) external onlyOwner {
-        require(_exists(tokenId), "ERC721: URI set of nonexistent token");
+        require(ERC721URIStorage._exists(tokenId), "ERC721: URI set of nonexistent token");
         _setTokenURI(tokenId, tokenURI);
     }
 }

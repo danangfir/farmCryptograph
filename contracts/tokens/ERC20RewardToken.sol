@@ -9,7 +9,7 @@ contract ERC20RewardToken is ERC20, Ownable {
     uint256 public constant INITIAL_SUPPLY = 1000000 * (10 ** 18);
 
     // Konstruktor menerima nama dan simbol token sebagai argumen
-    constructor() ERC20("RewardToken", "RWT") {
+    constructor() ERC20("RewardToken", "RWT") Ownable() {
         // Mint initial supply kepada owner (deploy account)
         _mint(msg.sender, INITIAL_SUPPLY);
     }
