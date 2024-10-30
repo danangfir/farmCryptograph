@@ -1,14 +1,16 @@
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
 
 async function main() {
-  // Dapatkan kontrak dari folder contracts/
-  const ProductTracking = await hre.ethers.getContractFactory("ProductTracking");
-  
-  // Deploy kontrak
-  const productTracking = await ProductTracking.deploy();
-  await productTracking.deployed();
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  console.log("ProductTracking deployed to:", productTracking.address);
+  const RewardToken = await ethers.getContractFactory("ERC20RewardToken");
+  const rewardToken = await RewardToken.deploy();
+  console.log("RewardToken deployed to:", rewardToken.address);
+
+  const ProductNFT = await ethers.getContractFactory("ERC721ProductNFT");
+  const productNFT = await ProductNFT.deploy();
+  console.log("ProductNFT deployed to:", productNFT.address);
 }
 
 main().catch((error) => {

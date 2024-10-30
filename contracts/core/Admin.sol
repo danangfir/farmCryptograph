@@ -8,8 +8,6 @@ contract Admin is IAdmin, AccessControl {
     string[] public categories;
     mapping(string => bool) public categoryExists;
 
-    event CategoryAdded(string category);
-
     modifier onlyNewCategory(string memory _category) {
         require(!categoryExists[_category], "Category already exists");
         _;

@@ -24,7 +24,8 @@ contract ERC721ProductNFT is ERC721URIStorage, Ownable {
 
     // Fungsi untuk mengupdate metadata URI
     function updateTokenURI(uint256 tokenId, string memory tokenURI) external onlyOwner {
-        require(ERC721URIStorage._exists(tokenId), "ERC721: URI set of nonexistent token");
+        // Gunakan _exists(tokenId) untuk mengecek apakah token ada
+        require(_exists(tokenId), "ERC721: URI set of nonexistent token");
         _setTokenURI(tokenId, tokenURI);
     }
 }

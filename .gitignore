@@ -1,2 +1,42 @@
-node_modules
+# Node modules dan cache
+node_modules/
+.cache/
+dist/
+build/
+artifacts/
+cache/
+coverage/
+typechain/
+
+# File environment
 .env
+.env.local
+.env.*.local
+
+# File log dan debugging
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+hardhat.log
+
+# File IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# File sistem operasi
+Thumbs.db
+desktop.ini
+
+# Output pelaporan cakupan kode
+coverage/
+coverage.json
+
+# File transpiler dan kompilasi TypeScript (jika digunakan)
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Lainnya
+*.log

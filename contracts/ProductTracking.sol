@@ -1,12 +1,163 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./core/Product.sol";
-import "./core/Admin.sol";
-import "./core/Customer.sol";
-import "./tokens/ERC20RewardToken.sol";
-import "./tokens/ERC721ProductNFT.sol";
+// Product.sol
+contract Product {
+    struct ProductInfo {
+        string name;
+        string category;
+        string origin;
+        string ipfsHash;
+        address farmer;
+        bool isCertified;
+        address currentOwner;
+    }
 
+    uint256 public productCount;
+    mapping(uint256 => ProductInfo) public products;
+    mapping(address => bool) public registeredFarmers;
+
+    event FarmerRegistered(address indexed farmer);
+    
+    modifier onlyFarmer() {
+        require(registeredFarmers[msg.sender], "Not a registered farmer");
+        _;
+    }
+
+    function registerFarmer(address _farmer) internal {
+        registeredFarmers[_farmer] = true;
+        emit FarmerRegistered(_farmer);
+    }
+
+    function addProduct(
+        string memory _name,
+        string memory _category,
+        string memory _origin,
+        string memory _ipfsHash
+    ) internal onlyFarmer {
+        productCount++;
+        products[productCount] = ProductInfo({
+            name: _name,
+            category: _category,
+            origin: _origin,
+            ipfsHash: _ipfsHash,
+            farmer: msg.sender,
+            isCertified: false,
+            currentOwner: msg.sender
+        });
+    }
+
+    function certifyProduct(uint256 _productId, string memory _ipfsHash) internal {
+        require(_productId <= productCount, "Invalid product ID");
+        require(!products[_productId].isCertified, "Already certified");
+        products[_productId].isCertified = true;
+        products[_productId].ipfsHash = _ipfsHash;
+    }
+
+    function transferProduct(uint256 _productId, address _newOwner) internal {
+        require(_productId <= productCount, "Invalid product ID");
+        require(products[_productId].currentOwner == msg.sender, "Not the owner");
+        products[_productId].currentOwner = _newOwner;
+    }
+}
+
+// Admin.sol
+contract Admin {
+    address public owner;
+    mapping(address => bool) public admins;
+
+    event AdminAdded(address indexed admin);
+    event AdminRemoved(address indexed admin);
+
+    constructor() {
+        owner = msg.sender;
+        admins[msg.sender] = true;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(admins[msg.sender], "Not an admin");
+        _;
+    }
+
+    function addAdmin(address _admin) external onlyOwner {
+        admins[_admin] = true;
+        emit AdminAdded(_admin);
+    }
+
+    function removeAdmin(address _admin) external onlyOwner {
+        require(_admin != owner, "Cannot remove owner");
+        admins[_admin] = false;
+        emit AdminRemoved(_admin);
+    }
+}
+
+// Customer.sol
+contract Customer {
+    struct CustomerInfo {
+        bool isRegistered;
+        uint256[] purchasedProducts;
+    }
+
+    mapping(address => CustomerInfo) public customers;
+
+    event CustomerRegistered(address indexed customer);
+
+    function registerCustomer() external {
+        require(!customers[msg.sender].isRegistered, "Already registered");
+        customers[msg.sender].isRegistered = true;
+        emit CustomerRegistered(msg.sender);
+    }
+
+    function addPurchasedProduct(address _customer, uint256 _productId) internal {
+        require(customers[_customer].isRegistered, "Customer not registered");
+        customers[_customer].purchasedProducts.push(_productId);
+    }
+}
+
+// ERC20RewardToken.sol
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract ERC20RewardToken is ERC20, Ownable {
+    constructor() ERC20("Farming Reward Token", "FRT") {}
+
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
+    }
+}
+
+// ERC721ProductNFT.sol
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+
+contract ERC721ProductNFT is ERC721, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+
+    constructor() ERC721("Product NFT", "PNFT") {}
+
+    function createProductNFT(address recipient) external onlyOwner returns (uint256) {
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+        _mint(recipient, newTokenId);
+        return newTokenId;
+    }
+
+    function transferProductNFT(address from, address to, uint256 tokenId) external {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Not approved or owner");
+        _transfer(from, to, tokenId);
+    }
+}
+
+// ProductTracking.sol (Updated Main Contract)
 contract ProductTracking is Product, Admin, Customer {
     ERC20RewardToken public rewardToken;
     ERC721ProductNFT public productNFT;
@@ -24,37 +175,70 @@ contract ProductTracking is Product, Admin, Customer {
         productNFT = ERC721ProductNFT(_productNFTAddress);
     }
 
-    // Fungsi untuk mendaftarkan produk baru dan menciptakan NFT
-    function registerProductWithNFT(string memory _name, string memory _ipfsHash) external onlyFarmer {
-        addProduct(_name, _ipfsHash);
-        uint256 productId = productCounter;
+    function registerFarmerExternal(address _farmer) external onlyAdmin {
+        registerFarmer(_farmer);
+    }
 
-        // Mint NFT untuk produk baru
+    function registerProductWithNFT(
+        string memory _name,
+        string memory _category,
+        string memory _origin,
+        string memory _ipfsHash
+    ) external onlyFarmer {
+        addProduct(_name, _category, _origin, _ipfsHash);
+        
+        uint256 productId = productCount;
         uint256 tokenId = productNFT.createProductNFT(msg.sender);
+        
         emit NFTCreated(productId, msg.sender);
-
         emit ProductRegistered(productId, _name, msg.sender);
     }
 
-    // Fungsi untuk mensahkan produk dan memberikan reward kepada petani
-    function certifyProductAndReward(uint256 _productId, string memory _ipfsHash, uint256 rewardAmount) external onlyAdmin {
+    function certifyProductAndReward(
+        uint256 _productId,
+        string memory _ipfsHash,
+        uint256 rewardAmount
+    ) external onlyAdmin {
         certifyProduct(_productId, _ipfsHash);
-
-        // Berikan reward kepada petani
         address farmer = products[_productId].farmer;
         rewardToken.mint(farmer, rewardAmount);
+        
         emit RewardIssued(farmer, rewardAmount);
-
         emit ProductCertified(_productId, _ipfsHash);
     }
 
-    // Fungsi untuk mentransfer produk dan NFT terkait
     function transferProductWithNFT(uint256 _productId, address _newOwner) external {
-        // Transfer kepemilikan produk
+        require(_productId <= productCount, "Invalid product ID");
+        require(products[_productId].currentOwner == msg.sender, "Not the owner");
+        
         transferProduct(_productId, _newOwner);
-
-        // Transfer NFT produk terkait
-        uint256 tokenId = _productId; // Asumsikan tokenId = productId
+        uint256 tokenId = _productId;
         productNFT.transferProductNFT(msg.sender, _newOwner, tokenId);
+        
+        if(customers[_newOwner].isRegistered) {
+            addPurchasedProduct(_newOwner, _productId);
+        }
+    }
+
+    function getProductDetails(uint256 _productId) external view returns (
+        string memory name,
+        string memory category,
+        string memory origin,
+        string memory ipfsHash,
+        address farmer,
+        bool isCertified,
+        address currentOwner
+    ) {
+        require(_productId <= productCount, "Invalid product ID");
+        ProductInfo memory product = products[_productId];
+        return (
+            product.name,
+            product.category,
+            product.origin,
+            product.ipfsHash,
+            product.farmer,
+            product.isCertified,
+            product.currentOwner
+        );
     }
 }
