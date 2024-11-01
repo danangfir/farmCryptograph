@@ -18,7 +18,7 @@ contract Product {
     mapping(address => bool) public registeredFarmers;
 
     event FarmerRegistered(address indexed farmer);
-    
+
     modifier onlyFarmer() {
         require(registeredFarmers[msg.sender], "Not a registered farmer");
         _;
@@ -133,10 +133,8 @@ contract ERC20RewardToken is ERC20, Ownable {
 
 // ERC721ProductNFT.sol
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
 
 contract ERC721ProductNFT is ERC721, Ownable {
     using Counters for Counters.Counter;
@@ -157,7 +155,7 @@ contract ERC721ProductNFT is ERC721, Ownable {
     }
 }
 
-// ProductTracking.sol (Updated Main Contract)
+// ProductTracking.sol (Main Contract)
 contract ProductTracking is Product, Admin, Customer {
     ERC20RewardToken public rewardToken;
     ERC721ProductNFT public productNFT;
@@ -165,7 +163,7 @@ contract ProductTracking is Product, Admin, Customer {
     event ProductRegistered(uint256 indexed productId, string name, address indexed farmer);
     event ProductCertified(uint256 indexed productId, string ipfsHash);
     event RewardIssued(address indexed recipient, uint256 amount);
-    event NFTCreated(uint256 indexed productId, address indexed owner);
+    event NFTCreated(uint256 indexed productId, address indexed owner, uint256 tokenId);
 
     constructor(
         address _rewardTokenAddress,
@@ -190,7 +188,7 @@ contract ProductTracking is Product, Admin, Customer {
         uint256 productId = productCount;
         uint256 tokenId = productNFT.createProductNFT(msg.sender);
         
-        emit NFTCreated(productId, msg.sender);
+        emit NFTCreated(productId, msg.sender, tokenId);
         emit ProductRegistered(productId, _name, msg.sender);
     }
 
