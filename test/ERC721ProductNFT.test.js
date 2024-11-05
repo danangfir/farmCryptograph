@@ -2,29 +2,28 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("ERC721ProductNFT Contract", function () {
-  let ProductNFT;
-  let productNFT;
-  let owner, user;
+  let productNFT, owner, user;
 
   beforeEach(async function () {
     [owner, user] = await ethers.getSigners();
 
-    // Deploy kontrak ERC721ProductNFT.sol
-    ProductNFT = await ethers.getContractFactory("ERC721ProductNFT");
+    const ProductNFT = await ethers.getContractFactory("contracts/tokens/ERC721ProductNFT.sol:ERC721ProductNFT");
     productNFT = await ProductNFT.deploy();
-    await productNFT.deployed();
+    await productNFT.waitForDeployment();    
   });
 
   it("should mint a new NFT", async function () {
-    const tokenId = await productNFT.mintNFT(user.address, "ipfs://QmHashForProduct");
-    expect(await productNFT.ownerOf(1)).to.equal(user.address);
+    const tx = await productNFT.createProductNFT(user.address);
+    const balance = await productNFT.balanceOf(user.address);
+    expect(balance).to.equal(1);  // Memastikan user memiliki 1 NFT
   });
 
   it("should allow owner to update token URI", async function () {
-    await productNFT.mintNFT(user.address, "ipfs://QmHashForProduct");
-    await productNFT.updateTokenURI(1, "ipfs://NewHashForProduct");
+    const tx = await productNFT.createProductNFT(user.address);
+    const tokenId = 1; // Asumsi tokenId dimulai dari 1
 
-    const newTokenURI = await productNFT.tokenURI(1);
-    expect(newTokenURI).to.equal("ipfs://NewHashForProduct");
+    // Panggil updateTokenURI untuk memperbarui URI
+    await productNFT.connect(user).updateTokenURI(tokenId, "new-uri");
+    expect(await productNFT.tokenURI(tokenId)).to.equal("new-uri");
   });
 });

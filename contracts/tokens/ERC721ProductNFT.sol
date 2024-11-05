@@ -1,31 +1,32 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// Import dari OpenZeppelin ERC721
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ERC721ProductNFT is ERC721URIStorage, Ownable {
-    uint256 public tokenIdCounter;
+contract ERC721ProductNFT is ERC721URIStorage {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
 
-    constructor() ERC721("ProductNFT", "PNFT") Ownable() {
-        tokenIdCounter = 1; // Mulai dari 1 untuk NFT ID
-    }
+    constructor() ERC721("ProductNFT", "PNFT") {}
 
-    // Fungsi untuk mint NFT baru
-    function mintNFT(address to, string memory tokenURI) external onlyOwner returns (uint256) {
-        uint256 newTokenId = tokenIdCounter;
+    function createProductNFT(address to) public returns (uint256) {
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
         _safeMint(to, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-
-        tokenIdCounter += 1;
         return newTokenId;
     }
 
-    // Fungsi untuk mengupdate metadata URI
-    function updateTokenURI(uint256 tokenId, string memory tokenURI) external onlyOwner {
-        // Gunakan _exists(tokenId) untuk mengecek apakah token ada
-        require(_exists(tokenId), "ERC721: URI set of nonexistent token");
+    function createProductNFT(address to, string memory tokenURI) public returns (uint256) {
+        uint256 tokenId = createProductNFT(to);
         _setTokenURI(tokenId, tokenURI);
+        return tokenId;
+    }
+
+    // Tambahkan fungsi updateTokenURI
+    function updateTokenURI(uint256 tokenId, string memory newURI) public {
+        // Hanya pemilik atau pihak yang disetujui yang bisa memperbarui URI
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Caller is not owner nor approved");
+        _setTokenURI(tokenId, newURI);
     }
 }

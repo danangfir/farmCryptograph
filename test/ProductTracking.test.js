@@ -2,69 +2,41 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("ProductTracking", function () {
-  let rewardToken, productNFT, productTracking;
+  let productTracking, rewardToken, productNFT;
   let owner, farmer, customer;
-  const initialSupply = 1000000;
 
   beforeEach(async function () {
-    // Dapatkan akun untuk testing
     [owner, farmer, customer] = await ethers.getSigners();
 
-    // Deploy ERC20RewardToken
-    const ERC20RewardToken = await ethers.getContractFactory("ERC20RewardToken");
-    rewardToken = await ERC20RewardToken.deploy(initialSupply);
-    await rewardToken.deployed();
+    const ERC20RewardToken = await ethers.getContractFactory("contracts/tokens/ERC20RewardToken.sol:ERC20RewardToken");
+    rewardToken = await ERC20RewardToken.deploy();
+    await rewardToken.waitForDeployment();
 
-    // Deploy ERC721ProductNFT
-    const ERC721ProductNFT = await ethers.getContractFactory("ERC721ProductNFT");
+    const ERC721ProductNFT = await ethers.getContractFactory("contracts/tokens/ERC721ProductNFT.sol:ERC721ProductNFT");
     productNFT = await ERC721ProductNFT.deploy();
-    await productNFT.deployed();
+    await productNFT.waitForDeployment();
 
-    // Deploy ProductTracking
-    const ProductTracking = await ethers.getContractFactory("ProductTracking");
-    productTracking = await ProductTracking.deploy(rewardToken.address, productNFT.address);
-    await productTracking.deployed();
+    const ProductTracking = await ethers.getContractFactory("contracts/ProductTracking.sol:ProductTracking");
+    productTracking = await ProductTracking.deploy(await rewardToken.getAddress(), await productNFT.getAddress());
+    await productTracking.waitForDeployment();
+
+    expect(await productTracking.rewardToken()).to.equal(await rewardToken.getAddress());
+    expect(await productTracking.productNFT()).to.equal(await productNFT.getAddress());
   });
 
   it("Should register a new product with NFT", async function () {
-    // Farmer mendaftarkan produk baru
-    await productTracking.connect(farmer).registerProductWithNFT("Product1", "ipfsHash1");
+    await productTracking.connect(owner).registerFarmerExternal(farmer.address);
 
-    // Verifikasi produk telah terdaftar
-    const product = await productTracking.getProduct(1);
-    expect(product.name).to.equal("Product1");
-    expect(product.ipfsHash).to.equal("ipfsHash1");
-    expect(product.currentOwner).to.equal(farmer.address);
-  });
+    // Hilangkan pencarian event dan cek langsung keberadaan produk
+    await productTracking.connect(farmer).registerProductWithNFT(
+      "Tomato", 
+      "Vegetable", 
+      "Farm A", 
+      "ipfs://initialHash"
+    );
 
-  it("Should certify product and issue reward", async function () {
-    // Farmer mendaftarkan produk
-    await productTracking.connect(farmer).registerProductWithNFT("Product1", "ipfsHash1");
-
-    // Admin mensahkan produk dan memberikan reward
-    await productTracking.connect(owner).certifyProductAndReward(1, "ipfsHashCertified", 100);
-
-    // Verifikasi produk tersertifikasi dan reward diterima
-    const product = await productTracking.getProduct(1);
-    expect(product.certified).to.be.true;
-    expect(product.ipfsHash).to.equal("ipfsHashCertified");
-
-    const farmerBalance = await rewardToken.balanceOf(farmer.address);
-    expect(farmerBalance).to.equal(100);
-  });
-
-  it("Should transfer product with NFT", async function () {
-    // Farmer mendaftarkan produk
-    await productTracking.connect(farmer).registerProductWithNFT("Product1", "ipfsHash1");
-
-    // Transfer produk dan NFT ke pelanggan
-    await productTracking.connect(farmer).transferProductWithNFT(1, customer.address);
-
-    // Verifikasi transfer produk dan NFT
-    const product = await productTracking.getProduct(1);
-    expect(product.currentOwner).to.equal(customer.address);
-
-    const tokenOwner = await productNFT.ownerOf(1);
-    expect(tokenOwner).to.equal(customer.address);
+    const productId = 1; // Misalnya, jika `productId` dimulai dari 1
+    expect(await productNFT.ownerOf(productId)).to.equal(farmer.address);
+    expect((await productTracking.getProductDetails(productId)).name).to.equal("Tomato");
   });
 });

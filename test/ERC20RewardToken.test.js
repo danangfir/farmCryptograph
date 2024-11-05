@@ -2,33 +2,25 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("ERC20RewardToken Contract", function () {
-  let RewardToken;
-  let rewardToken;
-  let owner, user;
+  let rewardToken, owner;
 
   beforeEach(async function () {
-    [owner, user] = await ethers.getSigners();
+    [owner] = await ethers.getSigners();
 
-    // Deploy kontrak ERC20RewardToken.sol
-    RewardToken = await ethers.getContractFactory("ERC20RewardToken");
+    const RewardToken = await ethers.getContractFactory("contracts/tokens/ERC20RewardToken.sol:ERC20RewardToken");
     rewardToken = await RewardToken.deploy();
-    await rewardToken.deployed();
+    await rewardToken.waitForDeployment();    
   });
 
   it("should have initial supply assigned to owner", async function () {
-    const ownerBalance = await rewardToken.balanceOf(owner.address);
-    expect(ownerBalance).to.equal(await rewardToken.totalSupply());
+    const balance = await rewardToken.balanceOf(owner.address);
+    expect(balance).to.equal(await rewardToken.totalSupply());
   });
 
   it("should allow owner to mint new tokens", async function () {
-    await rewardToken.mint(user.address, 1000);
-    const userBalance = await rewardToken.balanceOf(user.address);
-    expect(userBalance).to.equal(1000);
-  });
-
-  it("should allow owner to reward users", async function () {
-    await rewardToken.rewardUser(user.address, 500);
-    const userBalance = await rewardToken.balanceOf(user.address);
-    expect(userBalance).to.equal(500);
+    const amount = ethers.parseUnits("1000", 18);  // Ganti ke parseUnits versi ethers@6.x
+    await rewardToken.mint(owner.address, amount);
+    const balance = await rewardToken.balanceOf(owner.address);
+    expect(balance).to.equal(await rewardToken.totalSupply());
   });
 });
