@@ -1,42 +1,74 @@
-# Node modules dan cache
+# Node modules
 node_modules/
-.cache/
-dist/
-build/
-artifacts/
-cache/
-coverage/
-typechain/
 
-# File environment
-.env
-.env.local
-.env.*.local
-
-# File log dan debugging
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-hardhat.log
+pnpm-debug.log*
 
-# File IDE/editor
-.vscode/
-.idea/
-*.swp
-*.swo
+# Hardhat cache & artifacts
+cache/
+artifacts/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build output
+build/
+dist/
+
+# Dependency directories
 .DS_Store
+.idea/
+.vscode/
+.vscode-test/
 
-# File sistem operasi
-Thumbs.db
-desktop.ini
-
-# Output pelaporan cakupan kode
+# Hardhat files
+typechain/
 coverage/
 coverage.json
+coverage-final.json
+lcov-report/
 
-# File transpiler dan kompilasi TypeScript (jika digunakan)
-*.tsbuildinfo
-tsconfig.tsbuildinfo
+# Remix backup files
+backup/
+*.swp
+*.tmp
 
-# Lainnya
-*.log
+# Ignore Hardhat's .solhint.json file
+.solhint.json
+
+# Etherscan verification files
+etherscan-submit-list.json
+
+# Tailwind CSS
+tailwind.config.js
+
+# MacOS and Windows specific files
+Thumbs.db
+ehthumbs.db
+.DS_Store
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local Ethereum node data
+ganache-db/
+ganache-cli-db/
+truffle-db/
+
+# Ignore IDE and OS-specific files
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# npm package lock files for different package managers
+package-lock.json
+yarn.lock
+.pnpm-lock.yaml

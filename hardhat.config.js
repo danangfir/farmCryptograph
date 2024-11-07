@@ -1,7 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config(); // Mengimpor dotenv jika Anda menggunakan variabel lingkungan
+require("dotenv").config();
 
-/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
     version: "0.8.19",
@@ -15,16 +14,15 @@ module.exports = {
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545/",
-      chainId: 31337, // Chain ID jaringan lokal Hardhat
+      chainId: 31337,
     },
     hardhat: {
-      chainId: 31337 // Untuk jaringan Hardhat default
+      chainId: 31337
     },
-    // Tambahkan jaringan lainnya jika diperlukan, seperti Rinkeby, Goerli, dll.
-    // example: {
-    //   url: process.env.ALCHEMY_API_URL, // Menggunakan variabel lingkungan untuk URL RPC
-    //   accounts: [process.env.PRIVATE_KEY]
-    // }
+    sepolia: { // Ganti jaringan ke Sepolia
+      url: `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
+      accounts: [process.env.PRIVATE_KEY]
+    }
   },
   paths: {
     sources: "./contracts",
@@ -33,13 +31,13 @@ module.exports = {
     artifacts: "./artifacts"
   },
   gasReporter: {
-    enabled: true, // Aktifkan pelaporan gas
-    currency: "USD", // Konversi gas ke USD
-    gasPrice: 21, // Gas price yang digunakan untuk pelaporan
-    coinmarketcap: process.env.CMC_API_KEY // Kunci API dari CoinMarketCap untuk harga gas
+    enabled: true,
+    currency: "USD",
+    gasPrice: 21,
+    coinmarketcap: process.env.CMC_API_KEY
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY // Untuk verifikasi kontrak di Etherscan
+    apiKey: process.env.ETHERSCAN_API_KEY
   },
   typechain: {
     outDir: "typechain-types",
