@@ -1,15 +1,8 @@
+// index.js
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client"; // Import dari 'react-dom/client' untuk React 18
+import "./index.css"; // Pastikan index.css diimpor di sini
 import App from "./App";
 
-async function requestAccount() {
-  if (window.ethereum) {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-  } else {
-    alert("Please install MetaMask!");
-  }
-}
-
-requestAccount();
-
-ReactDOM.render(<App />, document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById("root")); // Menggunakan createRoot
+root.render(<App />); // Merender <App /> dengan createRoot
