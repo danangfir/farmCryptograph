@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getContract } from "../utils/eth";
+import { getProductContract } from "../utils/eth";
 
 function HomePage() {
   const [products, setProducts] = useState([]);
@@ -7,7 +7,7 @@ function HomePage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const contract = await getContract();
+        const contract = await getProductContract();
         const productCount = await contract.getProductCount();
         const productList = [];
 
@@ -27,7 +27,7 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Daftar Produk</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Product</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product, index) => (
           <div

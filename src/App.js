@@ -1,33 +1,35 @@
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Sidebar from "./components/Navbar"; // Navbar samping
 import HomePage from "./pages/HomePage";
-import ProductDetail from "./pages/ProductDetail";
-import RegisterProduct from "./pages/RegisterProduct";
+import AddProductPage from "./pages/AddProductPage";
+import AdminPage from "./pages/AdminPage";
+import FarmerPage from "./pages/FarmerPage";
+import CustomerPage from "./pages/CustomerPage";
+import AboutPage from "./pages/AboutPage";
+import LoginPage from "./pages/LoginPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
-  useEffect(() => {
-    const requestAccount = async () => {
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-        } catch (error) {
-          console.error("User denied account access");
-        }
-      } else {
-        alert("MetaMask is not installed!");
-      }
-    };
-
-    requestAccount();
-  }, []);
+  const isAuthenticated = true; // Ganti dengan logika autentikasi sesungguhnya
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/register" element={<RegisterProduct />} />
-      </Routes>
+      <div className="flex">
+        {isAuthenticated && <Sidebar />} {/* Navbar hanya muncul setelah login */}
+        <div className="ml-64 w-full p-6">
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/add-product" element={<AddProductPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/farmer" element={<FarmerPage />} />
+            <Route path="/customer" element={<CustomerPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+          </Routes>
+        </div>
+      </div>
     </Router>
   );
 }

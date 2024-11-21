@@ -15,11 +15,14 @@
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@openzeppelin/contracts": "^4.9.2",
+    "chart.js": "^4.4.6",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.4",
     "ipfs-http-client": "^60.0.1",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
     "react-router-dom": "^6.28.0",
     "react-scripts": "^5.0.1",
     "tailwindcss": "^3.4.14"
@@ -58,5 +61,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

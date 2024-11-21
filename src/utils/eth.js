@@ -1,29 +1,42 @@
-import { ethers } from "ethers";
+// src/utils/eth.js
+import { ethers, BrowserProvider } from "ethers";
 
-// Fungsi untuk mendapatkan provider, menggunakan MetaMask jika tersedia
-export function getProvider() {
+// Fungsi untuk menghubungkan ke MetaMask
+export async function requestAccount() {
   if (window.ethereum) {
-    // Jika MetaMask terdeteksi, gunakan sebagai provider
-    return new ethers.BrowserProvider(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" });
   } else {
-    // Jika MetaMask tidak terdeteksi, fallback ke JsonRpcProvider (tanpa wallet)
-    const networkUrl = process.env.REACT_APP_NETWORK_URL || "http://localhost:8545";
-    return new ethers.JsonRpcProvider(networkUrl);
+    alert("MetaMask tidak terdeteksi!");
   }
 }
 
-// Fungsi untuk mendapatkan kontrak dengan ABI dan alamat kontrak yang benar
-export async function getContract() {
-  const provider = getProvider();
-  const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
-
-  // ABI yang mencakup fungsi-fungsi di kontrak `Product.sol`
+// Fungsi untuk mendapatkan instance kontrak AccessControl
+export async function getAccessControlContract() {
+  const contractAddress = "ALAMAT_KONTRAK_ACCESS_CONTROL"; // Ganti dengan alamat kontrak Anda
   const contractABI = [
-    "function addProduct(string _name, string _category, string _origin, string _ipfsHash) external",
-    "function verifyProduct(uint256 _id) external",
-    "function getProduct(uint256 _id) external view returns (tuple(uint256 id, string name, string category, string origin, string ipfsHash, address owner, bool verified))",
-    "function getProductCount() external view returns (uint256)"
+    "function isAdmin(address) view returns (bool)",
+    "function isFarmer(address) view returns (bool)",
+    "function isCustomer(address) view returns (bool)",
+    "function grantRole(address, string)",
+    "function revokeRole(address, string)"
   ];
 
-  return new ethers.Contract(contractAddress, contractABI, provider.getSigner());
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  return new ethers.Contract(contractAddress, contractABI, signer);
 }
+
+// Fungsi untuk mendapatkan instance kontrak Produk
+export async function getProductContract() {
+  const contractAddress = "ALAMAT_KONTRAK_PRODUK"; // Ganti dengan alamat kontrak produk Anda
+  const contractABI = [
+    "function getProductCount() view returns (uint256)",
+    "function getProduct(uint256) view returns (tuple(string name, string category, string origin, string ipfsHash))"
+  ];
+
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  return new ethers.Contract(contractAddress, contractABI, signer);
+}
+
+
