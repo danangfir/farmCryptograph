@@ -1,109 +1,136 @@
-// src/pages/AddProductPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers"; // Import BigNumber
 
 function AddProductPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [origin, setOrigin] = useState("");
   const [ipfsHash, setIpfsHash] = useState("");
+  const [loading, setLoading] = useState(false); 
+  const [message, setMessage] = useState(null); 
 
-  const navigate = useNavigate(); // Untuk navigasi ke halaman lain setelah menambah produk
+  const navigate = useNavigate();
 
-  // Fungsi untuk menghubungkan wallet MetaMask
+  const categories = ["Buah-buahan", "Sayuran", "Daging", "Produk Olahan"]; 
+
   async function requestAccount() {
     if (window.ethereum) {
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
       } catch (error) {
         console.error("User rejected the request:", error);
-        alert("Gagal menghubungkan wallet. Pastikan Anda mengizinkan permintaan di MetaMask.");
+        throw new Error("Gagal menghubungkan wallet. Pastikan Anda mengizinkan permintaan di MetaMask.");
       }
     } else {
-      alert("MetaMask tidak terdeteksi! Pastikan MetaMask sudah terpasang.");
+      throw new Error("MetaMask tidak terdeteksi! Pastikan MetaMask sudah terpasang.");
     }
   }
 
-  // Fungsi untuk mendapatkan kontrak menggunakan ethers v6
   async function getContract() {
-    const provider = new ethers.BrowserProvider(window.ethereum); // Menggunakan BrowserProvider dari MetaMask di ethers v6
-    const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS; // Alamat kontrak yang sudah di-deploy
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
     const contractABI = [
       "function addProduct(string _name, string _category, string _origin, string _ipfsHash) external",
-      "function getProduct(uint256 _id) external view returns (tuple(uint256 id, string name, string category, string origin, string ipfsHash, address owner, bool verified))",
-      "function getProductCount() external view returns (uint256)"
     ];
-    const signer = await provider.getSigner(); // Mengambil signer dari MetaMask
+    const signer = await provider.getSigner();
     return new ethers.Contract(contractAddress, contractABI, signer);
   }
 
-  // Fungsi untuk menambah produk
   const handleAddProduct = async () => {
     if (!name || !category || !origin || !ipfsHash) {
-      alert("Semua field harus diisi!");
+      setMessage({ type: "error", text: "Semua field harus diisi!" });
       return;
     }
 
     try {
-      await requestAccount(); // Panggil fungsi untuk menghubungkan wallet
+      setLoading(true); 
+      setMessage(null); 
 
+      await requestAccount();
       const contract = await getContract();
-      const tx = await contract.addProduct(name, category, origin, ipfsHash);
-      await tx.wait(); // Menunggu transaksi selesai
-      alert("Produk berhasil ditambahkan!");
+      const tx = await contract.addProduct(name, category, origin, ipfsHash, {
+        gasLimit: BigInt("100000"), // Use BigInt from ethers v6+
+      });      
+      await tx.wait();
 
-      // Reset form setelah submit
+      setMessage({ type: "success", text: `Produk "${name}" berhasil ditambahkan!` });
+
+      // Reset form
       setName("");
       setCategory("");
       setOrigin("");
       setIpfsHash("");
 
-      // Navigasi ke halaman Home setelah berhasil menambah produk
-      navigate("/");
+      setTimeout(() => navigate("/"), 2000);
     } catch (error) {
       console.error("Error menambahkan produk:", error);
-      alert("Gagal menambahkan produk. Pastikan wallet terhubung dan kontrak dapat diakses.");
+      setMessage({ type: "error", text: error.message });
+    } finally {
+      setLoading(false); 
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 flex justify-center items-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Tambah Produk</h2>
+
+        {message && (
+          <div
+            className={`p-3 mb-4 text-white text-center rounded ${
+              message.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
         <input
           type="text"
           placeholder="Nama Produk"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
         />
-        <input
-          type="text"
-          placeholder="Kategori"
+
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-        />
+          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
+        >
+          <option value="">Pilih Kategori</option>
+          {categories.map((cat, index) => (
+            <option key={index} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+
         <input
           type="text"
           placeholder="Asal"
           value={origin}
           onChange={(e) => setOrigin(e.target.value)}
-          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
         />
+
         <input
           type="text"
           placeholder="IPFS Hash"
           value={ipfsHash}
           onChange={(e) => setIpfsHash(e.target.value)}
-          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+          className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-300"
         />
+
         <button
           onClick={handleAddProduct}
-          className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-300"
+          disabled={loading}
+          className={`w-full p-3 rounded text-white ${
+            loading ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"
+          } transition duration-300`}
         >
-          Tambah Produk
+          {loading ? "Menambahkan Produk..." : "Tambah Produk"}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Sidebar from "./components/Navbar"; // Navbar samping
+import Sidebar from "./components/Navbar"; 
 import HomePage from "./pages/HomePage";
 import AddProductPage from "./pages/AddProductPage";
 import AdminPage from "./pages/AdminPage";
@@ -11,13 +11,13 @@ import LoginPage from "./pages/LoginPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
-  const isAuthenticated = true; // Ganti dengan logika autentikasi sesungguhnya
+  const isAuthenticated = true; 
 
   return (
     <Router>
       <div className="flex">
         {isAuthenticated && <Sidebar />} {/* Navbar hanya muncul setelah login */}
-        <div className="ml-64 w-full p-6">
+        <div className="ml-64 w-full p-6 ">
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/home" element={<HomePage />} />
