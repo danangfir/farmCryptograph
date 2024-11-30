@@ -20,7 +20,7 @@ describe("ERC721ProductNFT Contract", function () {
 
   it("should allow owner to update token URI", async function () {
     const tx = await productNFT.createProductNFT(user.address);
-    const tokenId = 1; // Asumsi tokenId dimulai dari 1
+    const tokenId = 1; // Misalnya, jika `tokenId` dimulai dari 1
 
     // Panggil updateTokenURI untuk memperbarui URI
     await productNFT.connect(user).updateTokenURI(tokenId, "new-uri");

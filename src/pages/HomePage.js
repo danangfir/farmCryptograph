@@ -47,20 +47,30 @@ export default function HomePage() {
   }, [walletConnected]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col md:flex-row">
+    <div className="min-h-screen bg-white flex flex-wrap md:flex-row">
       {/* Left Section */}
-      <div className="flex-1 p-8 md:p-16">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4">
-          Web3 Agriculture Marketplace
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Platform berbasis blockchain untuk transaksi aman, transparan, dan
-          terdesentralisasi dalam rantai pasok produk pertanian.
-        </p>
-        <div className="flex space-x-4">
+        <div className="flex-1 p-8 md:p-16">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            Web3 Agriculture Marketplace
+          </h1>
+          <p className="text-lg text-gray-600 mb-8">
+            Platform berbasis blockchain untuk transaksi aman, transparan, dan
+            terdesentralisasi dalam rantai pasok produk pertanian.
+          </p>
+        {/* Highlight Fitur */}
+        <div className="bg-gray-50 rounded-lg shadow-lg p-6 mt-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Mengapa Memilih Kami?</h2>
+          <ul className="space-y-2 text-gray-700">
+            <li>✔️ <strong>Transparansi:</strong> Seluruh transaksi tercatat di blockchain.</li>
+            <li>✔️ <strong>Keamanan:</strong> Data dan pembayaran terlindungi dengan teknologi desentralisasi.</li>
+            <li>✔️ <strong>Efisiensi:</strong> Kurangi perantara, langsung dari petani ke pembeli.</li>
+            <li>✔️ <strong>Global Reach:</strong> Akses pasar pertanian global dengan mudah.</li>
+          </ul>
+        </div>
+        <div className="flex space-x-4 mt-8">
           <button
             onClick={connectWallet}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition"
+            className="bg-hijaugaming text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition"
           >
             {walletConnected ? "Wallet Connected" : "Connect Wallet"}
           </button>
@@ -69,12 +79,11 @@ export default function HomePage() {
           </button>
         </div>
         {errorMessage && <p className="text-red-500 mt-4">{errorMessage}</p>}
-      </div>
-
+    </div>
       {/* Right Section */}
-      <div className="flex-1 bg-gray-50 p-8 md:p-16">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+      <div className="flex-1 border border-gray-500 rounded-lg bg-black p-8 md:p-16">
+        <div className="bg-bghitamgaming border border-gray-500 rounded-lg shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-semibold text-putihtext mb-2">
             Produk Terdaftar
           </h2>
           {walletConnected ? (
@@ -114,7 +123,7 @@ export default function HomePage() {
             </p>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-bghitamgaming border border-gray-500 rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-700 mb-2">
             Tambah Kontrak Baru
           </h2>
@@ -137,6 +146,29 @@ export default function HomePage() {
               Create
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* Statistik Kami */}
+      <div className="bg-blue-600 text-white rounded-lg shadow-lg p-6 mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Statistik Kami</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h3 className="text-4xl font-bold">120+</h3>
+            <p>Produk Terdaftar</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-bold">50+</h3>
+            <p>Transaksi Selesai</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-bold">25</h3>
+            <p>Negara Terkoneksi</p>
+          </div>
+          <div>
+            <h3 className="text-4xl font-bold">100%</h3>
+            <p>Keamanan Data</p>
+          </div>
         </div>
       </div>
     </div>

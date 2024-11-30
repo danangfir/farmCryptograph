@@ -39,4 +39,3 @@ export async function getProductContract() {
   return new ethers.Contract(contractAddress, contractABI, signer);
 }
 
-

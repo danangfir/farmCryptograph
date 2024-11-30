@@ -23,7 +23,7 @@ Untuk test frontend, jalankan:
 
 Untuk test smart contracts, jalankan:
 
-```npm run test-contracts```
+```npx hardhat test```
 
 Deploy Kontrak ke Node Lokal:
 
