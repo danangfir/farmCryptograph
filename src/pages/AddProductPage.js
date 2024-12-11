@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ethers, BigNumber } from "ethers"; // Import BigNumber
+import { ethers } from "ethers";
 
 function AddProductPage() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [origin, setOrigin] = useState("");
   const [ipfsHash, setIpfsHash] = useState("");
-  const [loading, setLoading] = useState(false); 
-  const [message, setMessage] = useState(null); 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
 
   const navigate = useNavigate();
 
-  const categories = ["Buah-buahan", "Sayuran", "Daging", "Produk Olahan"]; 
+  const categories = ["Buah-buahan", "Sayuran", "Daging", "Produk Olahan"];
 
   async function requestAccount() {
     if (window.ethereum) {
@@ -20,7 +20,9 @@ function AddProductPage() {
         await window.ethereum.request({ method: "eth_requestAccounts" });
       } catch (error) {
         console.error("User rejected the request:", error);
-        throw new Error("Gagal menghubungkan wallet. Pastikan Anda mengizinkan permintaan di MetaMask.");
+        throw new Error(
+          "Gagal menghubungkan wallet. Pastikan Anda mengizinkan permintaan di MetaMask."
+        );
       }
     } else {
       throw new Error("MetaMask tidak terdeteksi! Pastikan MetaMask sudah terpasang.");
@@ -28,12 +30,17 @@ function AddProductPage() {
   }
 
   async function getContract() {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(window.ethereum); // Gunakan BrowserProvider
     const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
     const contractABI = [
       "function addProduct(string _name, string _category, string _origin, string _ipfsHash) external",
     ];
-    const signer = await provider.getSigner();
+    
+    // Log untuk debugging
+    console.log("Contract address:", contractAddress);
+    console.log("Contract ABI:", contractABI);
+
+    const signer = await provider.getSigner(); // Pastikan ini benar
     return new ethers.Contract(contractAddress, contractABI, signer);
   }
 
@@ -44,14 +51,18 @@ function AddProductPage() {
     }
 
     try {
-      setLoading(true); 
-      setMessage(null); 
+      setLoading(true);
+      setMessage(null);
 
       await requestAccount();
       const contract = await getContract();
+
+      // Log untuk debugging
+      console.log("Transaction Data:", { name, category, origin, ipfsHash });
+
       const tx = await contract.addProduct(name, category, origin, ipfsHash, {
-        gasLimit: BigInt("100000"), // Use BigInt from ethers v6+
-      });      
+        gasLimit: 100000,
+      });
       await tx.wait();
 
       setMessage({ type: "success", text: `Produk "${name}" berhasil ditambahkan!` });
@@ -67,14 +78,16 @@ function AddProductPage() {
       console.error("Error menambahkan produk:", error);
       setMessage({ type: "error", text: error.message });
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Tambah Produk</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Tambah Produk
+        </h2>
 
         {message && (
           <div
