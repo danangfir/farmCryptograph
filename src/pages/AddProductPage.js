@@ -49,39 +49,55 @@ function AddProductPage() {
       setMessage({ type: "error", text: "Semua field harus diisi!" });
       return;
     }
-
+  
     try {
       setLoading(true);
       setMessage(null);
-
+  
       await requestAccount();
+  
+      // Deklarasikan provider di sini
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const nonce = await provider.getTransactionCount(signer.getAddress(), "latest");
+  
       const contract = await getContract();
-
+  
       // Log untuk debugging
       console.log("Transaction Data:", { name, category, origin, ipfsHash });
+      console.log("Nonce yang digunakan:", nonce);
+      console.log("Nama Produk:", name);
+      console.log("Kategori:", category);
+      console.log("Asal:", origin);
+      console.log("IPFS Hash:", ipfsHash);
 
       const tx = await contract.addProduct(name, category, origin, ipfsHash, {
-        gasLimit: 100000,
+        gasLimit: 300000,
+        nonce: nonce,
       });
       await tx.wait();
-
+  
       setMessage({ type: "success", text: `Produk "${name}" berhasil ditambahkan!` });
-
+  
       // Reset form
       setName("");
       setCategory("");
       setOrigin("");
       setIpfsHash("");
-
-      setTimeout(() => navigate("/"), 2000);
+  
+      setTimeout(() => navigate("/admin"), 2000);
     } catch (error) {
       console.error("Error menambahkan produk:", error);
       setMessage({ type: "error", text: error.message });
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
+  setTimeout(() => {
+    navigate("/admin");
+  }, 2000);
+  
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -149,5 +165,7 @@ function AddProductPage() {
     </div>
   );
 }
+
+
 
 export default AddProductPage;

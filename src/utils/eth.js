@@ -111,7 +111,7 @@ export async function getProductContract() {
 // Fungsi untuk mendapatkan instance kontrak AccessControl
 export async function getAccessControlContract() {
   const { signer } = await getEthereumProviderAndSigner();
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const contractAddress = process.env.REACT_APP_PRODUCT_TRACKING_ADDRESS;
   const contractABI = [
     "function isAdmin(address) view returns (bool)",
     "function isFarmer(address) view returns (bool)",
