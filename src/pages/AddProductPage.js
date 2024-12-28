@@ -76,6 +76,7 @@ function AddProductPage() {
         nonce: nonce,
       });
       await tx.wait();
+      console.log("Produk berhasil ditambahkan ke blockchain");
   
       setMessage({ type: "success", text: `Produk "${name}" berhasil ditambahkan!` });
   
@@ -94,10 +95,6 @@ function AddProductPage() {
     }
   };  
 
-  setTimeout(() => {
-    navigate("/admin");
-  }, 2000);
-  
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
