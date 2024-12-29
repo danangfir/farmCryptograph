@@ -1,12 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { getProductContract } from "../utils/eth";
-import { Pie, Bar } from "react-chartjs-2";
+import { Pie, Bar, Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement, // Tambahkan ini
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement, // Daftarkan ini
+  Title,
+  Tooltip,
+  Legend
+);
+
 
 const AnalyticsPage = () => {
+  // State dan logika tetap sama
   const [totalProducts, setTotalProducts] = useState(0);
   const [verifiedProducts, setVerifiedProducts] = useState(0);
   const [unverifiedProducts, setUnverifiedProducts] = useState(0);
   const [categoryData, setCategoryData] = useState({});
+  const [monthlyTrends, setMonthlyTrends] = useState({});
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -16,19 +43,26 @@ const AnalyticsPage = () => {
 
         let verified = 0;
         const categories = {};
+        const trends = {}; // Untuk menyimpan data bulanan
 
         for (let i = 1; i <= productCount; i++) {
           const product = await contract.getProduct(i);
           if (product.verified) verified++;
 
-          // Hitung jumlah kategori
+          // Hitung kategori
           categories[product.category] = (categories[product.category] || 0) + 1;
+
+          // Hitung tren bulanan (contoh: berdasarkan bulan ditambahkan)
+          const addedDate = new Date(product.addedDate * 1000); // Konversi dari timestamp
+          const monthYear = `${addedDate.getMonth() + 1}/${addedDate.getFullYear()}`;
+          trends[monthYear] = (trends[monthYear] || 0) + 1;
         }
 
         setTotalProducts(productCount);
         setVerifiedProducts(verified);
         setUnverifiedProducts(productCount - verified);
         setCategoryData(categories);
+        setMonthlyTrends(trends);
       } catch (error) {
         console.error("Error fetching analytics:", error);
       }
@@ -57,6 +91,19 @@ const AnalyticsPage = () => {
         label: "Jumlah Produk per Kategori",
         data: Object.values(categoryData),
         backgroundColor: "#2196F3",
+      },
+    ],
+  };
+
+  // Data untuk Line Chart (Tren Bulanan)
+  const lineData = {
+    labels: Object.keys(monthlyTrends).sort(),
+    datasets: [
+      {
+        label: "Tren Penambahan Produk Bulanan",
+        data: Object.values(monthlyTrends),
+        borderColor: "#FF5722",
+        backgroundColor: "rgba(255, 87, 34, 0.2)",
       },
     ],
   };
@@ -91,6 +138,12 @@ const AnalyticsPage = () => {
           <h3 className="text-xl font-bold text-gray-800 mb-4">Kategori Produk</h3>
           <Bar data={barData} />
         </div>
+      </div>
+
+      {/* Grafik Tren Bulanan */}
+      <div className="bg-white p-6 rounded shadow mt-8">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Tren Penambahan Produk Bulanan</h3>
+        <Line data={lineData} />
       </div>
     </div>
   );

@@ -15,7 +15,7 @@
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@openzeppelin/contracts": "^4.9.2",
-    "chart.js": "^4.4.6",
+    "chart.js": "^4.4.7",
     "dotenv": "^16.4.5",
     "ether": "^0.0.9",
     "ethers": "^6.13.4",
