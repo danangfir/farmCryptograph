@@ -77,6 +77,7 @@ function AddProductPage() {
       });
       await tx.wait();
       console.log("Produk berhasil ditambahkan ke blockchain");
+      console.log("Transaksi berhasil, TX:", tx.hash);
   
       setMessage({ type: "success", text: `Produk "${name}" berhasil ditambahkan!` });
   
